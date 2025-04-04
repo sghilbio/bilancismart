@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: bilancismart-api
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bilancismart-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BACKEND_CORS_ORIGINS
+        value: '["http://localhost:3000","https://bilancismart.vercel.app"]'
+
+databases:
+  - name: bilancismart-db
+    databaseName: bilancismart
+    user: bilancismart
+    plan: free 
