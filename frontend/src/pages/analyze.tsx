@@ -17,8 +17,7 @@ import { FileUpload } from '@/components/FileUpload';
 import { DataTable } from '@/components/DataTable';
 import { analyzeBalance, downloadData } from '@/lib/api';
 import dynamic from 'next/dynamic';
-import { Data, Layout, Datum } from 'plotly.js';
-import { PlotParams } from 'react-plotly.js';
+import { PlotData } from 'plotly.js';
 
 // Dynamically import Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -191,9 +190,11 @@ export default function AnalyzePage() {
           <TabPanel value={tabValue} index={3}>
             {Object.entries(analysisResult.financial_indices).map(
               ([year, indices]: [string, any]) => {
-                // Convertiamo esplicitamente i dati in Datum[]
-                const xData = Object.keys(indices) as Datum[];
-                const yData = Object.values(indices).map(Number) as Datum[];
+                const chartData: Partial<PlotData>[] = [{
+                  type: 'bar',
+                  x: Array.from(Object.keys(indices)) as string[],
+                  y: Array.from(Object.values(indices)).map(Number) as number[],
+                }];
 
                 return (
                   <Box key={year} sx={{ mb: 4 }}>
@@ -201,11 +202,7 @@ export default function AnalyzePage() {
                       {year}
                     </Typography>
                     <Plot
-                      data={[{
-                        x: xData,
-                        y: yData,
-                        type: 'bar' as const
-                      }]}
+                      data={chartData}
                       layout={{
                         title: `Indici Finanziari ${year}`,
                         xaxis: { title: 'Indice' },
