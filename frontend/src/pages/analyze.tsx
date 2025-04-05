@@ -17,6 +17,8 @@ import { FileUpload } from '@/components/FileUpload';
 import { DataTable } from '@/components/DataTable';
 import { analyzeBalance, downloadData } from '@/lib/api';
 import dynamic from 'next/dynamic';
+import { Data, Layout, Datum } from 'plotly.js';
+import { PlotParams } from 'react-plotly.js';
 
 // Dynamically import Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -188,28 +190,32 @@ export default function AnalyzePage() {
 
           <TabPanel value={tabValue} index={3}>
             {Object.entries(analysisResult.financial_indices).map(
-              ([year, indices]: [string, any]) => (
-                <Box key={year} sx={{ mb: 4 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {year}
-                  </Typography>
-                  <Plot
-                    data={[
-                      {
-                        x: Object.keys(indices) as string[],
-                        y: Object.values(indices) as number[],
-                        type: 'bar',
-                      }
-                    ]}
-                    layout={{
-                      title: `Indici Finanziari ${year}`,
-                      xaxis: { title: 'Indice' },
-                      yaxis: { title: 'Valore' },
-                    }}
-                    style={{ width: '100%', height: '400px' }}
-                  />
-                </Box>
-              )
+              ([year, indices]: [string, any]) => {
+                // Convertiamo esplicitamente i dati in Datum[]
+                const xData = Object.keys(indices) as Datum[];
+                const yData = Object.values(indices).map(Number) as Datum[];
+
+                return (
+                  <Box key={year} sx={{ mb: 4 }}>
+                    <Typography variant="h6" gutterBottom>
+                      {year}
+                    </Typography>
+                    <Plot
+                      data={[{
+                        x: xData,
+                        y: yData,
+                        type: 'bar' as const
+                      }]}
+                      layout={{
+                        title: `Indici Finanziari ${year}`,
+                        xaxis: { title: 'Indice' },
+                        yaxis: { title: 'Valore' }
+                      }}
+                      style={{ width: '100%', height: '400px' }}
+                    />
+                  </Box>
+                );
+              }
             )}
           </TabPanel>
         </Box>
