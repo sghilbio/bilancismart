@@ -196,10 +196,10 @@ export default function AnalyzePage() {
                   <Plot
                     data={[
                       {
-                        x: Object.keys(indices),
-                        y: Object.values(indices),
+                        x: Object.keys(indices) as string[],
+                        y: Object.values(indices) as number[],
                         type: 'bar',
-                      },
+                      }
                     ]}
                     layout={{
                       title: `Indici Finanziari ${year}`,
