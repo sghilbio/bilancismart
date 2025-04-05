@@ -1,13 +1,4 @@
-import axios from 'axios';
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 export interface AnalysisResponse {
   raw_data: any[];
@@ -19,12 +10,12 @@ export interface AnalysisResponse {
   };
 }
 
-export async function analyzeBalance(file: File, matchingType: 'fuzzy' | 'embedding' | 'gpt') {
+export async function analyzeBalance(file: File, matchingType: 'fuzzy' | 'embedding' | 'gpt'): Promise<AnalysisResponse> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('matching_type', matchingType);
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/analyze`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
     method: 'POST',
     body: formData,
   });
@@ -36,7 +27,7 @@ export async function analyzeBalance(file: File, matchingType: 'fuzzy' | 'embedd
   return response.json();
 }
 
-export function downloadData(data: any[], filename: string) {
+export function downloadData(data: any[], filename: string): void {
   const csvContent = convertToCSV(data);
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
@@ -51,7 +42,7 @@ export function downloadData(data: any[], filename: string) {
   }
 }
 
-function convertToCSV(data: any[]) {
+function convertToCSV(data: any[]): string {
   if (data.length === 0) return '';
 
   const headers = Object.keys(data[0]);
