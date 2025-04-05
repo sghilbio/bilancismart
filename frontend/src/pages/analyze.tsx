@@ -17,7 +17,6 @@ import { FileUpload } from '@/components/FileUpload';
 import { DataTable } from '@/components/DataTable';
 import { analyzeBalance, downloadData } from '@/lib/api';
 import dynamic from 'next/dynamic';
-import { Data } from 'plotly.js';
 
 // Dynamically import Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -42,13 +41,6 @@ function TabPanel(props: TabPanelProps) {
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
-}
-
-interface PlotData {
-  x: (string | number)[];
-  y: number[];
-  type: 'bar';
-  name?: string;
 }
 
 export default function AnalyzePage() {
@@ -197,12 +189,20 @@ export default function AnalyzePage() {
           <TabPanel value={tabValue} index={3}>
             {Object.entries(analysisResult.financial_indices).map(
               ([year, indices]: [string, any]) => {
-                const plotData: PlotData[] = [{
-                  x: Object.keys(indices),
-                  y: Object.values(indices).map(Number),
-                  type: 'bar',
-                  name: year
-                }];
+                // Prepara i dati in modo sicuro
+                const chartData = {
+                  data: [{
+                    x: Object.keys(indices),
+                    y: Object.values(indices).map(Number),
+                    type: 'bar' as const,
+                    name: year
+                  }],
+                  layout: {
+                    title: `Indici Finanziari ${year}`,
+                    xaxis: { title: 'Indice' },
+                    yaxis: { title: 'Valore' }
+                  }
+                };
 
                 return (
                   <Box key={year} sx={{ mb: 4 }}>
@@ -210,12 +210,7 @@ export default function AnalyzePage() {
                       {year}
                     </Typography>
                     <Plot
-                      data={plotData}
-                      layout={{
-                        title: `Indici Finanziari ${year}`,
-                        xaxis: { title: 'Indice' },
-                        yaxis: { title: 'Valore' }
-                      }}
+                      {...chartData}
                       style={{ width: '100%', height: '400px' }}
                     />
                   </Box>
